@@ -1,0 +1,26 @@
+version=4
+# check: uscan --report
+# update: uscan && gbp import-orig ../node-proxyquire_*.orig.tar.gz
+# see also <https://wiki.debian.org/Javascript/GroupSourcesTutorial>
+
+opts=\
+filenamemangle=s/.*?(@ANY_VERSION@@ARCHIVE_EXT@)/@PACKAGE@-$1/,\
+dversionmangle=auto,repacksuffix=~dfsg \
+https://github.com/thlorenz/proxyquire/tags \
+.*?@ANY_VERSION@@ARCHIVE_EXT@ group
+
+opts=\
+ctype=nodejs,\
+component=Xerror,\
+filenamemangle=s/.*?(@ANY_VERSION@@ARCHIVE_EXT@)/module-not-found-error-$1/,\
+dversionmangle=auto,repacksuffix=~dfsg \
+https://github.com/bendrucker/module-not-found-error/tags \
+.*?@ANY_VERSION@@ARCHIVE_EXT@ group
+
+opts=\
+ctype=nodejs,\
+component=Xkeys,\
+filenamemangle=s/.*?(@ANY_VERSION@@ARCHIVE_EXT@)/fill-keys-$1/,\
+dversionmangle=auto,repacksuffix=~dfsg \
+https://github.com/bendrucker/fill-keys/tags \
+.*?@ANY_VERSION@@ARCHIVE_EXT@ group

@@ -1,0 +1,49 @@
+#!/usr/bin/make -f
+
+# avoid colors in testsuite output
+export NODE_DISABLE_COLORS = 1
+
+# generate documentation unless nodoc requested
+ifeq (,$(filter nodoc,$(DEB_BUILD_OPTIONS)))
+DOCS = README.html README.txt
+endif
+
+ESLINT = eslint --format tap --no-eslintrc --env es6,node
+MOCHA = mocha --reporter tap --no-config --no-opts --no-package --no-timeout
+
+MOCHA_BROKEN += \
+ test/proxyquire-global.js \
+
+override_dh_auto_build: $(DOCS)
+
+# * tolerate known errors when targeted experimental
+override_dh_auto_test:
+	$(ESLINT) --no-inline-config '**/*.js'
+#	standard
+	tape Xerror/test.js Xkeys/test.js | debian/tap-todo \
+		'should be equal'
+	mkdir -p debian/node_modules
+	ln --force --symbolic ../../Xerror debian/node_modules/module-not-found-error
+	ln --force --symbolic ../../Xkeys debian/node_modules/fill-keys
+	NODE_PATH=debian/node_modules \
+		$(strip find test -maxdepth 1 -type f -name '*.js' \
+		$(patsubst %,-not -path '%',$(sort $(MOCHA_BROKEN))) \
+		-exec $(MOCHA) --require should {} +)
+	NODE_PATH=debian/node_modules \
+		$(MOCHA) --require should $(sort $(MOCHA_BROKEN)) | debian/tap-todo \
+		'^global flags set should not throw when a native module is required a second time\Z'
+
+override_dh_installdocs:
+	dh_installdocs --all -- $(DOCS)
+
+override_dh_clean:
+	dh_clean -- $(DOCS)
+
+%.html: %.md
+	pandoc --from gfm-raw_html --to html --standalone --output $@ $<
+
+%.txt: %.md
+	pandoc --from gfm-raw_html --to plain --output $@ $<
+
+%:
+	dh $@

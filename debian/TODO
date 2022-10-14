@@ -1,0 +1,4 @@
+  * solve known broken tests and stop tolerate them failing
+  * Check more tests when ESLint in Debian is recent enough.
+  * Check more tests when node modules are in Debian:
+    standard native-hello-world.
